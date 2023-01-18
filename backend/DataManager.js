@@ -41,23 +41,25 @@ function connectToDatabase() {
 }
 
 module.exports.readCSV = function () {
-    const db = connectToDatabase();
+  
     const sql = "INSERT OR REPLACE into intentions VALUES(?,?,?)";
-    const dbRecs = this.dbHasData(db);
-
-    if (dbRecs.dataBaseRecs == 0) {
+    // const dbRecs = this.dbHasData();
+  
+    // if (dbRecs.dataBaseRecs == 0) {
         fs.createReadStream("data.csv")
             .pipe(parse({ delimiter: "|", from_line: 1, relax_column_count: true }))
             .on("data", function (row) {
+                const db = connectToDatabase();
                 const stmt = db.prepare(sql);
                 const info = stmt.run(row[0], row[1], row[2])
+                db.close();
                 // console.log(row);
             }).on("end", () => {
                 console.log("finished");
             }).on("error", (error) => {
                 console.log(error.message);
             })
-    }
-    db.close();
+    // }
+
 }
 
